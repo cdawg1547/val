@@ -14,19 +14,20 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #ffe6e6; /* Soft Pink Background */
+            background-color: #ffe6e6; 
             font-family: 'Indie Flower', cursive;
-            overflow: hidden; /* Prevents scrollbars when button moves */
+            overflow: hidden; 
         }
 
         .container {
             text-align: center;
             position: relative;
+            z-index: 1; /* Ensures content stays above background */
         }
 
         h1 {
             font-size: 3rem;
-            color: #d63384; /* Hot Pink */
+            color: #d63384; 
             margin-bottom: 20px;
         }
 
@@ -51,13 +52,14 @@
             border-radius: 50px;
             cursor: pointer;
             font-family: 'Indie Flower', cursive;
-            transition: transform 0.2s;
+            transition: all 0.3s ease; /* Smooth hover effect */
         }
 
         #yesBtn {
-            background-color: #28a745; /* Green */
+            background-color: #28a745;
             color: white;
             box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+            z-index: 10;
         }
 
         #yesBtn:hover {
@@ -66,10 +68,12 @@
         }
 
         #noBtn {
-            background-color: #dc3545; /* Red */
+            background-color: #dc3545;
             color: white;
-            position: relative; /* Allows it to move */
             box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+            /* Important: We don't want the button to take up space in the layout 
+               once it starts moving, or the layout will shift. */
+            z-index: 10; 
         }
     </style>
 </head>
@@ -93,42 +97,45 @@
         const noBtn = document.getElementById('noBtn');
         const question = document.getElementById('question');
         const mainImage = document.getElementById('mainImage');
-        const container = document.querySelector('.container');
 
-        // Logic for the "No" button running away
-        // We use 'mouseover' for desktop and 'touchstart' for mobile
-        ['mouseover', 'touchstart'].forEach(event => {
-            noBtn.addEventListener(event, () => {
-                const i = Math.floor(Math.random() * (window.innerWidth - noBtn.offsetWidth));
-                const j = Math.floor(Math.random() * (window.innerHeight - noBtn.offsetHeight));
-                
-                noBtn.style.position = 'absolute';
-                noBtn.style.left = i + 'px';
-                noBtn.style.top = j + 'px';
-            });
+        // Function to move the button
+        function moveButton() {
+            // Get the viewport width and height
+            const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
+            const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
+
+            // CHANGED: Use 'fixed' position so it calculates relative to the screen, not the container
+            noBtn.style.position = 'fixed'; 
+            noBtn.style.left = `${x}px`;
+            noBtn.style.top = `${y}px`;
+        }
+
+        // Add event listeners for both desktop (mouseover) and mobile (touchstart)
+        noBtn.addEventListener('mouseover', moveButton);
+        noBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevents the button from actually being clicked on touch
+            moveButton();
         });
 
-        // Logic for the "Yes" button
+        // Yes Button Click Event
         yesBtn.addEventListener('click', () => {
-            // 1. Trigger Confetti
             confetti({
                 particleCount: 150,
                 spread: 70,
                 origin: { y: 0.6 }
             });
 
-            // 2. Change the content
             question.innerHTML = "Yay! I knew you'd say yes! ❤️";
             
-            // 3. Change the image to a celebratory one
+            // Celebration Image
             mainImage.src = "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Z5Z3YwY3Z4ZnZ4ZnZ4ZnZ4ZnZ4ZnZ4ZnZ4ZnZ4/T86i6yDyOYz7J6v9cz/giphy.gif"; 
 
-            // 4. Hide the buttons
+            // Hide the buttons smoothly
             document.querySelector('.btn-group').style.display = 'none';
             
-            // Optional: Continuous confetti for a few seconds
-            let duration = 3 * 1000;
-            let end = Date.now() + duration;
+            // Continuous confetti loop
+            const duration = 3 * 1000;
+            const end = Date.now() + duration;
 
             (function frame() {
                 confetti({
@@ -152,4 +159,4 @@
     </script>
 
 </body>
-</html>		
+</html>
